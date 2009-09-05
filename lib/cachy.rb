@@ -32,8 +32,10 @@ class Cachy
     args = args.dup
     options = extract_options!(args)
 
-    locales.each do |l|
-      cache_store.delete key(*(args + [options.merge(:locale=>l)]))
+    (locales+[false]).each do |locale|
+      without_locale = (locale==false)
+      args_with_locale = args + [options.merge(:locale=>locale, :without_locale=>without_locale)]
+      cache_store.delete key(*args_with_locale)
     end
   end
 
@@ -83,8 +85,10 @@ class Cachy
   end
 
   # fill locales with defauls
-  if defined? I18n and I18n.respond_to? :available_locales
-    @@locales = I18n.available_locales
+  @@locales = if defined?(I18n) and I18n.respond_to?(:available_locales)
+    I18n.available_locales
+  else
+    []
   end
 
   private

@@ -31,20 +31,36 @@ describe Cachy do
 
   describe :expire do
     it "expires the cache for all languages" do
-      available_locales = [:de,:fr,:en]
-      Cachy.stub!(:locales).and_return available_locales
-      Cachy.cache(:another_key){ "X" }
+      Cachy.cache(:my_key){ "without_locale" }
 
-      available_locales.each do |l|
+      locales = [:de, :en, :fr]
+      locales.each do |l|
         Cachy.stub!(:locale).and_return l
-        Cachy.cache(:my_key){ "X#{l}" }.should == "X#{l}"
-        Cachy.cache(:my_key){ "YYY" }.should == "X#{l}"
+        Cachy.cache(:my_key){ l }
       end
 
+      TEST_CACHE.keys.select{|k| k=~ /my_key/}.size.should == 4
+      Cachy.stub!(:locales).and_return locales
       Cachy.expire(:my_key)
+      TEST_CACHE.keys.select{|k| k=~ /my_key/}.size.should == 0
+    end
 
+    it "does not expire other keys" do
+      Cachy.cache(:another_key){ 'X' }
+      Cachy.cache(:my_key){ 'X' }
+      Cachy.cache(:yet_another_key){ 'X' }
+      Cachy.expire :my_key
       TEST_CACHE.keys.should include("another_key_v1")
-      TEST_CACHE.keys.detect{|k| k=~ /my_key/}.should == nil
+      TEST_CACHE.keys.should include("yet_another_key_v1")
+    end
+
+    it "expires the cache when no available_locales are set" do
+      Cachy.cache(:another_key){ "X" }
+      Cachy.cache(:my_key){ "X" }
+
+      TEST_CACHE.keys.select{|k| k=~ /my_key/}.size.should == 1
+      Cachy.expire(:my_key)
+      TEST_CACHE.keys.select{|k| k=~ /my_key/}.size.should == 0
     end
   end
 
@@ -61,6 +77,17 @@ describe Cachy do
 
     it "raises on unknown options" do
       lambda{Cachy.key(:x, :asdasd=>'asd')}.should raise_error
+    end
+
+    it "gets the locale from I18n" do
+      module I18n
+        def self.locale
+          :de
+        end
+      end
+      key = Cachy.key(:x)
+      Object.send :remove_const, :I18n #cleanup
+      key.should == "x_v1_de"
     end
 
     describe "with :keys" do
@@ -90,6 +117,20 @@ describe Cachy do
         de_key = Cachy.key(:x, :without_locale=>true)
         Cachy.stub!(:locale).and_return :en
         Cachy.key(:x, :without_locale=>true).should == de_key
+      end
+    end
+
+    describe 'with :locale' do
+      it "changes the default key" do
+        Cachy.key(:x, :locale=>:de).should_not == Cachy.key(:x)
+      end
+
+      it "is a different key for different locales" do
+        Cachy.key(:x, :locale=>:de).should_not == Cachy.key(:x, :locale=>:en)
+      end
+
+      it "is the same key for the same locales" do
+        Cachy.key(:x, :locale=>:de).should == Cachy.key(:x, :locale=>:de)
       end
     end
   end
