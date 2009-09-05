@@ -1,8 +1,14 @@
 require 'spec/spec_helper'
 
+TEST_CACHE = TestCache.new
+
 describe Cachy do
+  before :all do
+    Cachy.cache_store = TEST_CACHE
+  end
+
   before do
-    CACHE.clear
+    TEST_CACHE.clear
   end
   
   describe :cache do
@@ -25,40 +31,32 @@ describe Cachy do
 
   describe :expire do
     it "expires the cache for all languages" do
+      available_locales = [:de,:fr,:en]
+      Cachy.stub!(:locales).and_return available_locales
       Cachy.cache(:another_key){ "X" }
 
-      $LANGUAGES.each do |l|
-        I18n.locale = l
+      available_locales.each do |l|
+        Cachy.stub!(:locale).and_return l
         Cachy.cache(:my_key){ "X#{l}" }.should == "X#{l}"
         Cachy.cache(:my_key){ "YYY" }.should == "X#{l}"
       end
 
       Cachy.expire(:my_key)
 
-      CACHE.keys.should include("another_key_v1_#{CACHE_VERSION}_de")
-      CACHE.keys.detect{|k| k=~ /my_key/}.should == nil
+      TEST_CACHE.keys.should include("another_key_v1")
+      TEST_CACHE.keys.detect{|k| k=~ /my_key/}.should == nil
     end
   end
 
   describe :key do
-    it "caches on updated at timestamps for model" do
-      user = Factory(:user)
-      Cachy.key(:my_key, user).should == "my_key_User:#{user.id}:#{user.updated_at.to_i}_v1_#{CACHE_VERSION}_de"
-    end
-
-    it "sorts models by name" do
-      user = Factory(:user)
-      product = Factory(:product)
-      Cachy.key(:a_key, product, user, product, :my_key).should =~ /my_key.*Product.*Product.*User/
-    end
-
-    it "does not sort non-models" do
-      user = Factory(:user)
-      Cachy.key(:my_key, 1, user, "abc").should =~ /^my_key_1_abc_User:\d+:\d+_v1_#{CACHE_VERSION}_de$/
+    it "builds based on cache_key" do
+      user = mock(:cache_key=>'XXX',:something_else=>'YYY')
+      Cachy.key(:my_key, 1, user, "abc").should == 'my_key_1_XXX_abc_v1'
     end
 
     it "adds current_language" do
-      Cachy.key(:x).should == "x_v1_#{CACHE_VERSION}_de"
+      Cachy.stub!(:locale).and_return :de
+      Cachy.key(:x).should == "x_v1_de"
     end
 
     it "raises on unknown options" do
@@ -83,14 +81,15 @@ describe Cachy do
 
     describe 'with :without_locale' do
       it "is stable with same locale" do
+        Cachy.stub!(:locale).and_return :de
         Cachy.key(:x, :without_locale=>true).should == Cachy.key(:x, :without_locale=>true)
       end
 
       it "is stable with different locales" do
+        Cachy.stub!(:locale).and_return :de
         de_key = Cachy.key(:x, :without_locale=>true)
-        I18n.with_locale 'en' do
-          Cachy.key(:x, :without_locale=>true).should == de_key
-        end
+        Cachy.stub!(:locale).and_return :en
+        Cachy.key(:x, :without_locale=>true).should == de_key
       end
     end
   end
@@ -112,26 +111,26 @@ describe Cachy do
     end
 
     it "does not overwrite a key when it already exists" do
-      Cachy.key_versions[:xxx] = 3
+      Cachy.key_versions = {:xxx => 3}
       Cachy.cache(:xxx){1}
       Cachy.cache(:xxx){1}
       Cachy.key_versions[:xxx].should == 3
     end
 
     it "reloads when keys have expired" do
-      Cachy.send :class_variable_set, "@@key_versions", {:versions=>{:xx=>2}, :last_set=>1.minute.ago}
-      CACHE['cachy_key_versions'] = {:xx=>1}
+      Cachy.send :class_variable_set, "@@key_versions", {:versions=>{:xx=>2}, :last_set=>(Time.now.to_i - 60)}
+      TEST_CACHE.write 'cachy_key_versions', {:xx=>1}
       Cachy.key_versions.should == {:xx=>1}
     end
 
     it "does not reload when keys have not expired" do
-      Cachy.send :class_variable_set, "@@key_versions", {:versions=>{:xx=>2}, :last_set=>Time.now}
-      CACHE['cachy_key_versions'] = {:xx=>1}
+      Cachy.send :class_variable_set, "@@key_versions", {:versions=>{:xx=>2}, :last_set=>Time.now.to_i}
+      TEST_CACHE.write 'cachy_key_versions', {:xx=>1}
       Cachy.key_versions.should == {:xx=>2}
     end
 
     it "expires when key_versions is set" do
-      Cachy.send :class_variable_set, "@@key_versions", {:versions=>{:xx=>2}, :last_set=>Time.now}
+      Cachy.send :class_variable_set, "@@key_versions", {:versions=>{:xx=>2}, :last_set=>Time.now.to_i}
       Cachy.key_versions = {:xx=>1}
       Cachy.key_versions[:xx].should == 1
     end

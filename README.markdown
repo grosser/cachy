@@ -66,6 +66,11 @@ No ActionController::Base.cache_store ?
 Give me something that responds to read/write(Rails style) or []/store(Moneta) or get/set(Memcached)
     Cachy.cache_store = some_cache
 
+TODO
+====
+ - build support for more than read/write cache stores
+ - build hashed keys
+
 Author
 ======
 [Michael Grosser](http://pragmatig.wordpress.com)  
