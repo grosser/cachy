@@ -1,4 +1,4 @@
-Cachy is a simple caching library for projects that have many processes or many caches.  
+Caching library for projects that have many processes or many caches.  
 (works out of the box when Rails is present)
 
 Install
@@ -19,7 +19,7 @@ Cache expensive operation that is run many times by many processes
     # 20 Processes -> Instant database death
     result = Cachy.cache(:a_key){ block_db_for_5_seconds }
 
-    # 19 Processes get [], 1 makes the request
+    # 19 Processes get [], 1 makes the request -- when finished all get the same cached result
     result = Cachy.cache(:a_key, :while_running=>[]){ block_db_for_5_seconds }
 
 
@@ -33,6 +33,11 @@ Uses I18n.locale if available
     Cachy.cache(:a_key){ 'English' }
     I18n.locale = :de
     Cachy.cache(:a_key){ 'German' } != 'English'
+
+Explicitly not use I18n.locale
+    Cachy.cache(:a_key, :witout_locale=>true){ 'English' }
+    I18n.locale = :de
+    Cachy.cache(:a_key, :witout_locale=>true){ 'German' } == 'English'
 
 Caching something that is already cached.
     a = Cachy.cache(:a, :expires_in=>1.day){ expensive() }
@@ -50,6 +55,11 @@ Use to cache e.g. Erb output
     <% cache Cachy.key(:a_key), :expires_in=>1.hour do %>
       More html ...
     <% end %>
+
+###Hash keys
+When your keys get to long(e.g. MemChached complains) they can be hashed (makes them unreadable but short)
+    Cachy.hash_keys = true  # global
+    Cachy.cache(:a_key, :hash_key=>true) # for single cache
 
 ###Cache_store
 No ActionController::Base.cache_store ?
