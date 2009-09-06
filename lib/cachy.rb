@@ -41,13 +41,15 @@ class Cachy
       end
     end * "_"
 
-    (options[:hash_key] || hash_keys) ? hash(key) : key
+    key = (options[:hash_key] || hash_keys) ? hash(key) : key
+    options[:prefix].to_s + key + options[:suffix].to_s
   end
 
   # Expire all possible locales of a cache, use the same arguments as with cache
   #
   # Cachy.expire(:my_key, User.first)
   # Cachy.expire(:my_key, User.first, :keys=>[:dependent_keys])
+  # Cachy.expire(:my_key, :prefix=>'views/')
   def self.expire(*args)
     options = extract_options!(args)
 
@@ -158,7 +160,7 @@ class Cachy
   end
 
   def self.ensure_valid_keys(options)
-    invalid = options.keys - [:keys, :expires_in, :without_locale, :locale, :while_running, :hash_key]
+    invalid = options.keys - [:keys, :expires_in, :without_locale, :locale, :while_running, :hash_key, :prefix, :suffix]
     raise "unknown keys #{invalid.inspect}" unless invalid.empty?
   end
 

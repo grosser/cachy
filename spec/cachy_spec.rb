@@ -69,6 +69,14 @@ describe Cachy do
       Cachy.expire(:my_key)
       TEST_CACHE.keys.select{|k| k=~ /my_key/}.size.should == 0
     end
+
+    it "expires the cache with prefix" do
+      key = 'views/my_key_v1'
+      TEST_CACHE.write(key, 'x')
+      TEST_CACHE.read(key).should_not == nil
+      Cachy.expire(:my_key, :prefix=>'views/')
+      TEST_CACHE.read(key).should == nil
+    end
   end
 
   describe :key do
