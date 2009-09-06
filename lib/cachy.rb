@@ -33,13 +33,15 @@ class Cachy
     options = extract_options!(args)
     ensure_valid_keys options
 
-    (args + meta_key_parts(args.first, options)).compact.map do |part|
+    key = (args + meta_key_parts(args.first, options)).compact.map do |part|
       if part.respond_to? :cache_key
         part.cache_key
       else
         part
       end
     end * "_"
+
+    (options[:hash_key] || hash_keys) ? hash(key) : key
   end
 
   # Expire all possible locales of a cache, use the same arguments as with cache
@@ -81,6 +83,10 @@ class Cachy
     version
   end
 
+  class << self
+    attr_accessor :hash_keys
+  end
+  
   # cache_store
   def self.cache_store=(x)
     @cache_store=x
@@ -130,8 +136,8 @@ class Cachy
     parts << global_cache_version
     parts << (options[:locale] || locale) unless options[:without_locale]
 
-    keys = [*options[:keys]].compact # .to_a without warning
-    parts += keys.map{ |k| "#{k}v#{key_version_for(k)}" }
+    keys = [*options[:keys]].compact # [*x] == .to_a without warnings
+    parts += keys.map{|k| "#{k}v#{key_version_for(k)}" }
     parts
   end
 
@@ -141,11 +147,15 @@ class Cachy
   end
 
   def self.ensure_valid_keys(options)
-    invalid = options.keys - [:keys, :expires_in, :without_locale, :locale, :while_running]
+    invalid = options.keys - [:keys, :expires_in, :without_locale, :locale, :while_running, :hash_key]
     raise "unknown keys #{invalid.inspect}" unless invalid.empty?
   end
 
-  # meta_key helpers
+  def self.hash(string)
+    require "digest/md5"
+    Digest::MD5.hexdigest(string)
+  end
+
   def self.global_cache_version
     defined?(CACHE_VERSION) ? CACHE_VERSION : nil
   end

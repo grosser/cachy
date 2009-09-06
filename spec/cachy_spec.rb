@@ -97,6 +97,33 @@ describe Cachy do
       key.should == "x_v1_de"
     end
 
+    describe "with :hash_key" do
+      before do
+        @hash = '3b2b8f418849bc73071375529f8515be'
+      end
+
+      after do
+        Cachy.hash_keys = false
+      end
+
+      it "hashed the key to a stable value" do
+        Cachy.key(:xxx, :hash_key=>true).should == @hash
+      end
+
+      it "changes when key changes" do
+        Cachy.key(:xxx, :hash_key=>true).should_not == Cachy.key(:yyy, :hash_key=>true)
+      end
+
+      it "changes when arguments change" do
+        Cachy.key(:xxx, :hash_key=>true).should_not == Cachy.key(:xxx, 1, :hash_key=>true)
+      end
+
+      it "can be triggered by Cachy.hash_keys" do
+        Cachy.hash_keys = true
+        Cachy.key(:xxx).should == @hash
+      end
+    end
+
     describe "with :keys" do
       it "is stable" do
         Cachy.key(:x, :keys=>'asd').should == Cachy.key(:x, :keys=>'asd')
