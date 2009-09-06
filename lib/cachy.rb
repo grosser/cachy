@@ -87,9 +87,20 @@ class Cachy
     attr_accessor :hash_keys
   end
   
-  # cache_store
+  # Wrap non ActiveSupport style cache stores,
+  # to get the same interface for all
   def self.cache_store=(x)
-    @cache_store=x
+    if x.respond_to? :read and x.respond_to? :write
+      @cache_store=x
+    elsif x.respond_to? "[]" and x.respond_to? :set
+      require 'cachy/memcached_wrapper'
+      @cache_store = MemcachedWrapper.new(x)
+    elsif x.respond_to? "[]" and x.respond_to? :store
+      require 'cachy/moneta_wrapper'
+      @cache_store = MonetaWrapper.new(x)
+    else
+      raise "This cache_store type is not usable for Cachy!"
+    end
   end
 
   def self.cache_store
