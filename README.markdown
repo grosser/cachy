@@ -95,7 +95,7 @@ No I18n.available_locales ?
 
 TODO
 ====
- - optionally store dependent keys, so that they can be setup up once
+ - optionally store dependent keys (:keys=>xxx), so that they can be setup up once and dont need to be remembered
 
 Author
 ======
