@@ -44,18 +44,21 @@ class Cachy
 
   @@key_versions = {:versions=>{}, :last_set=>0}
   def self.key_versions
-    if @@key_versions[:last_set] > (Time.now.to_i - KEY_VERSION_TIMEOUT)
-      @@key_versions[:versions]
-    else
-      cached = cache_store.read("cachy_key_versions") || {}
-      @@key_versions = {:versions=>cached, :last_set=>Time.now.to_i}
-      cached
+    if key_versions_expired?
+      versions = cache_store.read("cachy_key_versions") || {}
+      @@key_versions = {:versions=>versions, :last_set=>Time.now.to_i}
     end
+    @@key_versions[:versions]
   end
 
   def self.key_versions=(data)
     @@key_versions[:last_set] = 0 #expire current key
     cache_store.write("cachy_key_versions", data)
+  end
+
+  def self.key_versions_expired?
+    key_versions_timeout = Time.now.to_i - KEY_VERSION_TIMEOUT
+    @@key_versions[:last_set] < key_versions_timeout
   end
 
   def self.increment_key(key)
