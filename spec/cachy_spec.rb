@@ -27,6 +27,13 @@ describe Cachy do
         Cachy.cache(:my_key){ 'X' }.should == 'A'
       end
     end
+
+    it "can not set while_running to nil" do
+      Cachy.should_receive(:warn)
+      Cachy.cache(:my_key, :while_running=>nil) do
+        Cachy.cache(:my_key){ 'X' }.should == "X"
+      end
+    end
   end
 
   describe :expire do

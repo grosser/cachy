@@ -16,10 +16,10 @@ Usage
 
 Cache expensive operation that is run many times by many processes
 
-    # 20 Processes -> Instant database death
+    # 20 Processes in parallel -> Instant database death
     result = Cachy.cache(:a_key){ block_db_for_5_seconds }
 
-    # 19 Processes get [], 1 makes the request -- when finished all get the same cached result
+    # 19 Processes get [], 1 makes the request -- when cached all get the same result
     result = Cachy.cache(:a_key, :while_running=>[]){ block_db_for_5_seconds }
 
 

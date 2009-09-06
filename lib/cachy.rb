@@ -1,31 +1,34 @@
 class Cachy
+  WHILE_RUNNING_TMEOUT = 5*60 #seconds
   KEY_VERSION_TIMEOUT = 30 #seconds
 
   def self.cache(*args)
     key = key(*args)
     options = extract_options!(args)
 
-    #already cached?
-    result = cache_store.read key
-    return result if result
+    # Cached result?
+    result = cache_store.read(key) and return result
 
-    #for long queries, store something else in the cache, so that a often-called cache is not filled by multiple callers
-    cache_store.write key, options[:while_running], 5*60 if options[:while_running]
-    
+    set_while_running(key, options)
+
     result = yield
 
-    #setting with nil causes errors in the next get/set request
-    if options[:expires_in]
-      cache_store.write(key, result, :expires_in=>options[:expires_in])
-    else
-      cache_store.write(key, result)
-    end
-
+    cache_store.write key, result, options
     result
   end
 
   def self.key(*args)
-    args_to_key(args)
+    args = args.dup
+    options = extract_options!(args)
+    ensure_valid_keys options
+
+    (args + meta_key_parts(args.first, options)).compact.map do |part|
+      if part.respond_to? :cache_key
+        part.cache_key
+      else
+        part
+      end
+    end * "_"
   end
 
   def self.expire(*args)
@@ -63,29 +66,23 @@ class Cachy
     version
   end
 
-  def self.cache_store
-    @@cache_store || raise("Use: Cachy.cache_store = your_cache_store")
-  end
-
+  # cache_store
   def self.cache_store=(x)
-    @@cache_store=x
+    @cache_store=x
   end
 
-  # fill cache_store with Rails cache when present
-  if defined? ActionController::Base
-    @@cache_store = ActionController::Base.cache_store
+  def self.cache_store
+    @cache_store || raise("Use: Cachy.cache_store = your_cache_store")
   end
 
-  def self.locales
-    @@locales
+  self.cache_store = ActionController::Base.cache_store if defined? ActionController::Base
+
+  # locales
+  class << self
+    attr_accessor :locales
   end
 
-  def self.locales=(x)
-    @@locales = x
-  end
-
-  # fill locales with defauls
-  @@locales = if defined?(I18n) and I18n.respond_to?(:available_locales)
+  self.locales = if defined?(I18n) and I18n.respond_to?(:available_locales)
     I18n.available_locales
   else
     []
@@ -93,32 +90,33 @@ class Cachy
 
   private
 
+  # Temorarily store something else in the cache,
+  # so that a often-called and slow cache-block is not run by
+  # multiple processes in parallel
+  def self.set_while_running(key, options)
+    return unless options.key? :while_running
+    warn "You cannot set while_running to nil or false" unless options[:while_running]
+    cache_store.write key, options[:while_running], :expires_in=>WHILE_RUNNING_TMEOUT
+  end
+
+  def self.meta_key_parts(key, options)
+    unless [String, Symbol].include?(key.class)
+      raise ":key must be first argument of Cachy.cache / .key call"
+    end
+
+    parts = []
+    parts << "v#{key_version_for(key)}"
+    parts << global_cache_version
+    parts << (options[:locale] || locale) unless options[:without_locale]
+
+    keys = [*options[:keys]].compact # .to_a without warning
+    parts += keys.map{ |key| "#{key}v#{key_version_for(key)}" }
+    parts
+  end
+
   def self.key_version_for(key)
     key = key.to_sym
     key_versions[key] || increment_key(key)
-  end
-
-  def self.args_to_key(args)
-    args = args.dup
-    options = extract_options!(args)
-    ensure_valid_keys options
-
-    raise "key must be at first position" unless [String, Symbol].include?(args.first.class)
-    
-    args << "v#{key_version_for(args.first)}"
-    args << global_cache_version
-    args << (options[:locale] || locale) unless options[:without_locale]
-
-    keys = [*options[:keys]].compact # .to_a without warning
-    args += keys.map{ |key| "#{key}v#{key_version_for(key)}" }
-
-    args.compact.map do |item|
-      if item.respond_to? :cache_key
-        item.cache_key
-      else
-        item
-      end
-    end * "_"
   end
 
   def self.ensure_valid_keys(options)
