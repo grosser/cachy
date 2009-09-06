@@ -9,10 +9,10 @@ class Cachy
     # Cached result?
     result = cache_store.read(key) and return result
 
+    # Calculate result!
     set_while_running(key, options)
 
     result = yield
-
     cache_store.write key, result, options
     result
   end
@@ -110,7 +110,7 @@ class Cachy
     parts << (options[:locale] || locale) unless options[:without_locale]
 
     keys = [*options[:keys]].compact # .to_a without warning
-    parts += keys.map{ |key| "#{key}v#{key_version_for(key)}" }
+    parts += keys.map{ |k| "#{k}v#{key_version_for(k)}" }
     parts
   end
 
@@ -124,7 +124,7 @@ class Cachy
     raise "unknown keys #{invalid.inspect}" unless invalid.empty?
   end
 
-  #Helpers
+  # meta_key helpers
   def self.global_cache_version
     defined?(CACHE_VERSION) ? CACHE_VERSION : nil
   end
