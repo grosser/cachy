@@ -2,6 +2,13 @@ class Cachy
   WHILE_RUNNING_TMEOUT = 5*60 #seconds
   KEY_VERSION_TIMEOUT = 30 #seconds
 
+  # Cache the result of a block
+  #
+  # Cachy.cache(:my_key){ expensive() }
+  # Cachy.cache(:my_key, :expires_in=>1.hour){ expensive() }
+  # Cachy.cache(:my_key, :keys=>[:dependent_key]){ expensive() }
+  # Cachy.cache(:my_key, :without_locale=>true){ expensive() }
+  # Cachy.cache(:my_key, :hash_key=>true){ expensive() }
   def self.cache(*args)
     key = key(*args)
     options = extract_options!(args)
@@ -17,8 +24,12 @@ class Cachy
     result
   end
 
+  # Constructs a cache-key (first argument must be a String/Symbol)
+  #
+  # Cachy.key :my_key
+  # Cachy.key :my_key, User.first, :locale=>:de
+  # Cachy.key :my_key, User.first, :without_locale=>true, :hash_key=>true
   def self.key(*args)
-    args = args.dup
     options = extract_options!(args)
     ensure_valid_keys options
 
@@ -31,8 +42,11 @@ class Cachy
     end * "_"
   end
 
+  # Expire all possible locales of a cache, use the same arguments as with cache
+  #
+  # Cachy.expire(:my_key, User.first)
+  # Cachy.expire(:my_key, User.first, :keys=>[:dependent_keys])
   def self.expire(*args)
-    args = args.dup
     options = extract_options!(args)
 
     (locales+[false]).each do |locale|
@@ -42,6 +56,8 @@ class Cachy
     end
   end
 
+  # Fetch key_versions from cache every KEY_VERSION_TIMEOUT seconds,
+  # otherwise every .key call would result in an cache request
   @@key_versions = {:versions=>{}, :last_set=>0}
   def self.key_versions
     if key_versions_expired?
@@ -56,11 +72,7 @@ class Cachy
     cache_store.write("cachy_key_versions", data)
   end
 
-  def self.key_versions_expired?
-    key_versions_timeout = Time.now.to_i - KEY_VERSION_TIMEOUT
-    @@key_versions[:last_set] < key_versions_timeout
-  end
-
+  # Expires all caches that use this key
   def self.increment_key(key)
     key = key.to_sym
     version = key_versions[key] || 0
@@ -92,6 +104,12 @@ class Cachy
   end
 
   private
+
+  # Do we need to fetch fresh key_versions from cache ?
+  def self.key_versions_expired?
+    key_versions_timeout = Time.now.to_i - KEY_VERSION_TIMEOUT
+    @@key_versions[:last_set] < key_versions_timeout
+  end
 
   # Temorarily store something else in the cache,
   # so that a often-called and slow cache-block is not run by

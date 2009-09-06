@@ -68,6 +68,7 @@ Give me something that responds to read/write(Rails style) or []/store(Moneta) o
 
 TODO
 ====
+ - optionally store dependent keys, so that they can be setup up once
  - build support for more than read/write cache stores
  - build hashed keys
 
