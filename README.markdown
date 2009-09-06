@@ -1,5 +1,12 @@
 Caching library to simplify and organize caching.
 
+ - I18n (seperate caches by locale / expires all locales)
+ - Generation based (expire all caches of one type)
+ - Simultanouse caching (multiple processes trying to write same cache at once)
+ - Dependent caches (x caches result of cache z+y -> z changes -> x changes)
+ - Hashed keys (optional -> short/unreadable)
+ - Global cache_version (expire everything Cachy cached)
+ - ...
  - works out of the box with Rails
  - works with pure Memcache and [Moneta](http://github.com/wycats/moneta/tree/master)(-> Tokyo Cabinet / CouchDB / S3 / Berkeley DB / DataMapper / Memory store)
 
