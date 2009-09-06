@@ -41,8 +41,8 @@ Expire all all caches of one kind when e.g. codebase has been updated
     Cachy.cache(:a_key, :witout_locale=>true){ 'German' } == 'English'
 
 ####Caching results of other caches
-When inner cache is expired outer cache would normally still show old results.  
-Exipre outer cache when inner cache is expired.
+When inner cache is expired outer cache would normally still shows old results.  
+--> expire outer cache when inner cache is expired.
 
     a = Cachy.cache(:a, :expires_in=>1.day){ expensive() }
     b = Cachy.cache(:b, :expires_in=>1.week){ expensive_2() }
