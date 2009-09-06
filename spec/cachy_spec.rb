@@ -79,6 +79,16 @@ describe Cachy do
     end
   end
 
+  describe :expire_view do
+    it "expires the cache with prefix" do
+      key = 'views/my_key_v1'
+      TEST_CACHE.write(key, 'x')
+      TEST_CACHE.read(key).should_not == nil
+      Cachy.expire_view(:my_key)
+      TEST_CACHE.read(key).should == nil
+    end
+  end
+
   describe :key do
     it "builds based on cache_key" do
       user = mock(:cache_key=>'XXX',:something_else=>'YYY')

@@ -68,7 +68,7 @@ The cache server does not need to be restarted and session data(Rails) is saved.
 
 ###Cachy.expire / .expire_view
 Expires all locales of a key
-    Cachy.locales = [:de, :en]
+    Cachy.locales = [:de, :en] # by default filled with I18n.available_locales
     Cachy.expire(:my_key) -> expires for :de, :en and no-locale
 
     #expire "views/#{key}" (counterpart for Rails-view-caching)

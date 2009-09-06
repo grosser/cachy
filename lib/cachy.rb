@@ -60,6 +60,12 @@ class Cachy
     end
   end
 
+  def self.expire_view(*args)
+    options = extract_options!(args)
+    args = args + [options.merge(:prefix=>'views/')]
+    expire(*args)
+  end
+
   # Fetch key_versions from cache every KEY_VERSION_TIMEOUT seconds,
   # otherwise every .key call would result in an cache request
   @@key_versions = {:versions=>{}, :last_set=>0}
@@ -141,7 +147,7 @@ class Cachy
 
   def self.meta_key_parts(key, options)
     unless [String, Symbol].include?(key.class)
-      raise ":key must be first argument of Cachy.cache / .key call"
+      raise ":key must be first argument of Cachy call"
     end
 
     parts = []
