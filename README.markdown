@@ -1,7 +1,7 @@
 Caching library to simplify and organize caching.
 
  - works out of the box with Rails
- - works with pure Memcache and Moneta(-> Tokyo Cabinet / CouchDB / S3 / Berkeley DB / DataMapper / Memory store)
+ - works with pure Memcache and [Moneta](http://github.com/wycats/moneta/tree/master)(-> Tokyo Cabinet / CouchDB / S3 / Berkeley DB / DataMapper / Memory store)
 
 Install
 =======
@@ -85,7 +85,7 @@ Use to cache e.g. Erb output
 
 ###Cachy.cache_store
 No ActionController::Base.cache_store ?  
-Give me something that responds to read/write(Rails style) or []/store(Moneta) or get/set(Memcached)
+Give me something that responds to read/write(Rails style) or []/store([Moneta](http://github.com/wycats/moneta/tree/master)) or get/set(Memcached)
     Cachy.cache_store = some_cache
 
 
@@ -97,8 +97,12 @@ TODO
 ====
  - optionally store dependent keys (:keys=>xxx), so that they can be setup up once and dont need to be remembered
 
-Author
-======
+Authors
+=======
+
+###Contributors
+ - [mindreframer](http://www.simplewebapp.de/roman)
+
 [Michael Grosser](http://pragmatig.wordpress.com)  
 grosser.michael@gmail.com  
 Hereby placed under public domain, do what you want, just do not hold me accountable...
