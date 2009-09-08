@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{cachy}
-  s.version = "0.1.0"
+  s.version = "0.1.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Michael Grosser"]
-  s.date = %q{2009-09-06}
+  s.date = %q{2009-09-08}
   s.email = %q{grosser.michael@gmail.com}
   s.extra_rdoc_files = [
     "README.markdown"
