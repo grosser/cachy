@@ -73,6 +73,10 @@ Use a global `CACHE_VERSION=1` so that all caches can be expired when something 
 The cache server does not need to be restarted and session data(Rails) is saved.
 
 
+#### Does not cache nil
+If you want to cache a falsy result, use false
+    Cachy.cache(:x){ expensive || false }
+
 ###Cachy.expire / .expire_view
 Expires all locales of a key
     Cachy.locales = [:de, :en] # by default filled with I18n.available_locales

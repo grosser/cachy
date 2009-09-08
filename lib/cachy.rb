@@ -14,7 +14,8 @@ class Cachy
     options = extract_options!(args)
 
     # Cached result?
-    result = cache_store.read(key) and return result
+    result = cache_store.read(key)
+    return result unless result == nil
 
     # Calculate result!
     set_while_running(key, options)

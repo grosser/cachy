@@ -34,6 +34,16 @@ describe Cachy do
         Cachy.cache(:my_key){ 'X' }.should == "X"
       end
     end
+
+    it "can cache false" do
+      Cachy.cache(:x){ false }.should == false
+      Cachy.cache(:x){ true }.should == false
+    end
+
+    it "does not cache nil" do
+      Cachy.cache(:x){ nil }.should == nil
+      Cachy.cache(:x){ true }.should == true
+    end
   end
 
   describe :expire do
