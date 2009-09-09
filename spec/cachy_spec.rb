@@ -28,6 +28,12 @@ describe Cachy do
       end
     end
 
+    it "can set while_running to false" do
+      Cachy.cache(:my_key, :while_running=>false) do
+        Cachy.cache(:my_key){ 'X' }.should == false
+      end
+    end
+
     it "can not set while_running to nil" do
       Cachy.should_receive(:warn)
       Cachy.cache(:my_key, :while_running=>nil) do

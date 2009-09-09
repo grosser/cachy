@@ -142,7 +142,7 @@ class Cachy
   # multiple processes in parallel
   def self.set_while_running(key, options)
     return unless options.key? :while_running
-    warn "You cannot set while_running to nil or false" unless options[:while_running]
+    warn "You cannot set while_running to nil" if options[:while_running] == nil
     cache_store.write key, options[:while_running], :expires_in=>WHILE_RUNNING_TMEOUT
   end
 

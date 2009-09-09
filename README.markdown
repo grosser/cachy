@@ -74,8 +74,9 @@ The cache server does not need to be restarted and session data(Rails) is saved.
 
 
 #### Does not cache nil
-If you want to cache a falsy result, use false
+If you want to cache a falsy result, use false (same goes for :while_running)
     Cachy.cache(:x){ expensive || false }
+    Cachy.cache(:x, :while_running=>false){ expensive }
 
 ###Cachy.expire / .expire_view
 Expires all locales of a key
