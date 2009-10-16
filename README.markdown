@@ -12,7 +12,7 @@ Caching library to simplify and organize caching.
 
 Install
 =======
-As Gem: ` sudo gem install grosser-cachy -s http://gems.github.com `  
+As Gem: ` sudo gem install cachy `
 Or as Rails plugin: ` script/plugins install git://github.com/grosser/cachy.git `
 
 
