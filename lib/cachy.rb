@@ -119,14 +119,18 @@ class Cachy
   self.cache_store = ActionController::Base.cache_store if defined? ActionController::Base
 
   # locales
-  class << self
-    attr_accessor :locales
+  @@locales = nil
+  def self.locales=(x)
+    @@locales = x
   end
 
-  self.locales = if defined?(I18n) and I18n.respond_to?(:available_locales)
-    I18n.available_locales
-  else
-    []
+  def self.locales
+    return @@locales if @@locales
+    if defined?(I18n) and I18n.respond_to?(:available_locales)
+      I18n.available_locales
+    else
+      []
+    end
   end
 
   private
