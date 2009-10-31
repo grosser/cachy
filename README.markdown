@@ -1,11 +1,11 @@
 Caching library to simplify and organize caching.
 
  - I18n (seperate caches by locale / expires all locales)
- - Generation based (expire all caches of one type)
- - Simultanouse caching (multiple processes trying to write same cache at once)
+ - Generation based (your able expire all caches of one type)
+ - Simultanouse caching (handle multiple processes trying to write same expensive cache at once)
  - Dependent caches (x caches result of cache z+y -> z changes -> x changes)
  - Hashed keys (optional -> short/unreadable)
- - Global cache_version (expire everything Cachy cached)
+ - Global cache_version (expire everything Cachy cached, but not e.g. sessions)
  - ...
  - works out of the box with Rails
  - works with pure Memcache and [Moneta](http://github.com/wycats/moneta/tree/master)(-> Tokyo Cabinet / CouchDB / S3 / Berkeley DB / DataMapper / Memory store)
@@ -15,7 +15,6 @@ Install
 As Gem: ` sudo gem install cachy `
 Or as Rails plugin: ` script/plugins install git://github.com/grosser/cachy.git `
 
-
 Usage
 =====
 ###Cachy.cache
@@ -24,14 +23,14 @@ Usage
     result = Cachy.cache(:a_key, 'something else', Date.today.day){ expensive() }
 
 ####Cache expensive operation that is run many times by many processes
-Example scenario: at application Startup 20 processes try to set the same cache -> 20 heavy database requests -> database timeout -> cache still empty -> ... -> death
+Example: at application startup 20 processes try to set the same cache -> 20 heavy database requests -> database timeout -> cache still empty -> ... -> death
 
     # 19 Processes get [], 1 makes the request -- when cached all get the same result
     result = Cachy.cache(:a_key, :while_running=>[]){ block_db_for_5_seconds }
 
 
 ####Seperate version for each key
-Expire all all caches of one kind when e.g. codebase has been updated
+Expire all all caches of one kind when code inside the cache has been updated
 
     100.times{ Cachy.cache(:a_key, rand(100000) ){ expensive() } }
     Cachy.increment_key(:a_key) --> everything expired
@@ -107,7 +106,7 @@ No I18n.available_locales ?
 
 TODO
 ====
- - optionally store dependent keys (:keys=>xxx), so that they can be setup up once and dont need to be remembered
+ - optionally store dependent keys (:keys=>xxx), so that they can be setup up once and do not need to be remembered
 
 Authors
 =======
