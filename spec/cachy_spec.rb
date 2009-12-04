@@ -9,19 +9,20 @@ describe Cachy do
 
   before do
     TEST_CACHE.clear
+    TEST_CACHE.write(Cachy::HEALTH_CHECK_KEY, 'yes')
   end
-  
+
   describe :cache do
     it "caches" do
       Cachy.cache(:my_key){ "X" }.should == "X"
       Cachy.cache(:my_key){ "ABC" }.should == "X"
     end
-    
+
     it "expires" do
       Cachy.cache(:his_key, :expires_in=> -100){ 'X' }.should == 'X'
       Cachy.cache(:his_key, :expires_in=> -100){ 'X' }.should == 'X'
     end
-    
+
     it "sets cache to intermediate value while running expensive query" do
       Cachy.cache(:my_key, :while_running=>'A') do
         Cachy.cache(:my_key){ 'X' }.should == 'A'

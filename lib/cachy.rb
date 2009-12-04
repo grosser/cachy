@@ -1,6 +1,7 @@
 class Cachy
   WHILE_RUNNING_TMEOUT = 5*60 #seconds
   KEY_VERSION_TIMEOUT = 30 #seconds
+  HEALTH_CHECK_KEY = 'cachy_healthy'
 
   # Cache the result of a block
   #
@@ -95,7 +96,7 @@ class Cachy
   class << self
     attr_accessor :hash_keys
   end
-  
+
   # Wrap non ActiveSupport style cache stores,
   # to get the same interface for all
   def self.cache_store=(x)
@@ -110,6 +111,7 @@ class Cachy
     else
       raise "This cache_store type is not usable for Cachy!"
     end
+    @cache_store.write HEALTH_CHECK_KEY, 'yes'
   end
 
   def self.cache_store
@@ -134,6 +136,10 @@ class Cachy
   end
 
   private
+
+  def self.cache_healthy?
+    cache_store.read(HEALTH_CHECK_KEY) == 'yes'
+  end
 
   # Do we need to fetch fresh key_versions from cache ?
   def self.key_versions_expired?
@@ -167,7 +173,7 @@ class Cachy
 
   def self.key_version_for(key)
     key = key.to_sym
-    key_versions[key] || increment_key(key)
+    key_versions[key] || (cache_healthy? ? increment_key(key) : 1)
   end
 
   def self.ensure_valid_keys(options)
