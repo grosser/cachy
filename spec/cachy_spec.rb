@@ -128,7 +128,7 @@ describe Cachy do
         end
       end
       key = Cachy.key(:x)
-      Object.send :remove_const, :I18n #cleanup
+      Object.send :remove_const, :I18n rescue nil #cleanup 
       key.should == "x_v1_de"
     end
 
