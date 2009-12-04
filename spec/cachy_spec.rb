@@ -122,11 +122,15 @@ describe Cachy do
     end
 
     it "gets the locale from I18n" do
-      module I18n
+      # a bit weird but just module I18n does not work with 1.9.1
+      i18n = Module.new
+      i18n.class_eval do
         def self.locale
           :de
         end
       end
+      Object.const_set :I18n, i18n
+
       key = Cachy.key(:x)
       Object.send :remove_const, :I18n rescue nil #cleanup 
       key.should == "x_v1_de"
