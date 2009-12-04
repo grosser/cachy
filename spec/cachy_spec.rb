@@ -206,13 +206,20 @@ describe Cachy do
 
   describe :key_versions do
     before do
-      Cachy.key_versions = {}
+      Cachy.key_versions = nil
       Cachy.key_versions.should == {}
     end
 
     it "adds a key when cache is called the first time" do
       Cachy.cache(:xxx){1}
       Cachy.key_versions[:xxx].should == 1
+      TEST_CACHE.read(Cachy::KEY_VERSIONS_KEY).should_not == nil
+    end
+
+    it "does not add a key when cache is called the first time and cache is not healthy" do
+      TEST_CACHE.write(Cachy::HEALTH_CHECK_KEY, 'no')
+      Cachy.cache(:xxx){1}
+      TEST_CACHE.read(Cachy::KEY_VERSIONS_KEY).should == nil
     end
 
     it "adds a string key as symbol" do
@@ -229,13 +236,13 @@ describe Cachy do
 
     it "reloads when keys have expired" do
       Cachy.send :class_variable_set, "@@key_versions", {:versions=>{:xx=>2}, :last_set=>(Time.now.to_i - 60)}
-      TEST_CACHE.write 'cachy_key_versions', {:xx=>1}
+      TEST_CACHE.write Cachy::KEY_VERSIONS_KEY, {:xx=>1}
       Cachy.key_versions.should == {:xx=>1}
     end
 
     it "does not reload when keys have not expired" do
       Cachy.send :class_variable_set, "@@key_versions", {:versions=>{:xx=>2}, :last_set=>Time.now.to_i}
-      TEST_CACHE.write 'cachy_key_versions', {:xx=>1}
+      TEST_CACHE.write Cachy::KEY_VERSIONS_KEY, {:xx=>1}
       Cachy.key_versions.should == {:xx=>2}
     end
 

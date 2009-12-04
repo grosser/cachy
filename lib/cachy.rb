@@ -2,6 +2,7 @@ class Cachy
   WHILE_RUNNING_TMEOUT = 5*60 #seconds
   KEY_VERSION_TIMEOUT = 30 #seconds
   HEALTH_CHECK_KEY = 'cachy_healthy'
+  KEY_VERSIONS_KEY = 'cachy_key_versions'
 
   # Cache the result of a block
   #
@@ -73,7 +74,7 @@ class Cachy
   @@key_versions = {:versions=>{}, :last_set=>0}
   def self.key_versions
     if key_versions_expired?
-      versions = cache_store.read("cachy_key_versions") || {}
+      versions = cache_store.read(KEY_VERSIONS_KEY) || {}
       @@key_versions = {:versions=>versions, :last_set=>Time.now.to_i}
     end
     @@key_versions[:versions]
@@ -81,7 +82,7 @@ class Cachy
 
   def self.key_versions=(data)
     @@key_versions[:last_set] = 0 #expire current key
-    cache_store.write("cachy_key_versions", data)
+    cache_store.write(KEY_VERSIONS_KEY, data)
   end
 
   # Expires all caches that use this key
