@@ -4,6 +4,8 @@ class Cachy
   HEALTH_CHECK_KEY = 'cachy_healthy'
   KEY_VERSIONS_KEY = 'cachy_key_versions'
 
+  @@cache_error = false
+
   # Cache the result of a block
   #
   # Cachy.cache(:my_key){ expensive() }
@@ -74,7 +76,7 @@ class Cachy
   @@key_versions = {:versions=>{}, :last_set=>0}
   def self.key_versions
     if key_versions_expired?
-      versions = cache_store.read(KEY_VERSIONS_KEY) || {}
+      versions = read_versions
       @@key_versions = {:versions=>versions, :last_set=>Time.now.to_i}
     end
     @@key_versions[:versions]
@@ -82,16 +84,23 @@ class Cachy
 
   def self.key_versions=(data)
     @@key_versions[:last_set] = 0 #expire current key
-    cache_store.write(KEY_VERSIONS_KEY, data)
+    write_version(data)
   end
 
   # Expires all caches that use this key
   def self.increment_key(key)
     key = key.to_sym
-    version = key_versions[key] || 0
+    current_versions = read_versions
+    version = current_versions[key] || 0
     version += 1
-    self.key_versions = key_versions.merge(key => version)
+    self.key_versions = current_versions.merge(key => version)
     version
+  end
+
+  def self.delete_key(key)
+    versions = key_versions.dup
+    versions.delete(key.to_sym)
+    self.key_versions = versions
   end
 
   class << self
@@ -137,6 +146,21 @@ class Cachy
   end
 
   private
+
+  def self.read_versions
+    data = cache_store.instance_variable_get('@data')
+    if data.respond_to? :read_error_occured # its a MemCache with read_error detection !
+      result = data[KEY_VERSIONS_KEY] || {}
+      @@cache_error = data.read_error_occured
+      result
+    else
+      cache_store.read(KEY_VERSIONS_KEY) || {}
+    end
+  end
+
+  def self.write_version(data)
+    cache_store.write(KEY_VERSIONS_KEY, data) unless @@cache_error
+  end
 
   def self.cache_healthy?
     cache_store.read(HEALTH_CHECK_KEY) == 'yes'

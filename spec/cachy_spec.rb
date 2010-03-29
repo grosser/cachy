@@ -1,15 +1,12 @@
 require 'spec/spec_helper'
 
-TEST_CACHE = TestCache.new
-
 describe Cachy do
-  before :all do
-    Cachy.cache_store = TEST_CACHE
-  end
-
   before do
-    TEST_CACHE.clear
-    TEST_CACHE.write(Cachy::HEALTH_CHECK_KEY, 'yes')
+    @cache = TestCache.new
+    Cachy.cache_store = @cache
+    Cachy.class_eval "@@key_versions = {:versions=>{}, :last_set=>0}"
+    @cache.write(Cachy::HEALTH_CHECK_KEY, 'yes')
+    Cachy.send(:class_variable_set, '@@cache_error', false)
   end
 
   describe :cache do
@@ -63,10 +60,10 @@ describe Cachy do
         Cachy.cache(:my_key){ l }
       end
 
-      TEST_CACHE.keys.select{|k| k=~ /my_key/}.size.should == 4
+      @cache.keys.select{|k| k=~ /my_key/}.size.should == 4
       Cachy.stub!(:locales).and_return locales
       Cachy.expire(:my_key)
-      TEST_CACHE.keys.select{|k| k=~ /my_key/}.size.should == 0
+      @cache.keys.select{|k| k=~ /my_key/}.size.should == 0
     end
 
     it "does not expire other keys" do
@@ -74,35 +71,35 @@ describe Cachy do
       Cachy.cache(:my_key){ 'X' }
       Cachy.cache(:yet_another_key){ 'X' }
       Cachy.expire :my_key
-      TEST_CACHE.keys.should include("another_key_v1")
-      TEST_CACHE.keys.should include("yet_another_key_v1")
+      @cache.keys.should include("another_key_v1")
+      @cache.keys.should include("yet_another_key_v1")
     end
 
     it "expires the cache when no available_locales are set" do
       Cachy.cache(:another_key){ "X" }
       Cachy.cache(:my_key){ "X" }
 
-      TEST_CACHE.keys.select{|k| k=~ /my_key/}.size.should == 1
+      @cache.keys.select{|k| k=~ /my_key/}.size.should == 1
       Cachy.expire(:my_key)
-      TEST_CACHE.keys.select{|k| k=~ /my_key/}.size.should == 0
+      @cache.keys.select{|k| k=~ /my_key/}.size.should == 0
     end
 
     it "expires the cache with prefix" do
       key = 'views/my_key_v1'
-      TEST_CACHE.write(key, 'x')
-      TEST_CACHE.read(key).should_not == nil
+      @cache.write(key, 'x')
+      @cache.read(key).should_not == nil
       Cachy.expire(:my_key, :prefix=>'views/')
-      TEST_CACHE.read(key).should == nil
+      @cache.read(key).should == nil
     end
   end
 
   describe :expire_view do
     it "expires the cache with prefix" do
       key = 'views/my_key_v1'
-      TEST_CACHE.write(key, 'x')
-      TEST_CACHE.read(key).should_not == nil
+      @cache.write(key, 'x')
+      @cache.read(key).should_not == nil
       Cachy.expire_view(:my_key)
-      TEST_CACHE.read(key).should == nil
+      @cache.read(key).should == nil
     end
   end
 
@@ -132,7 +129,7 @@ describe Cachy do
       Object.const_set :I18n, i18n
 
       key = Cachy.key(:x)
-      Object.send :remove_const, :I18n rescue nil #cleanup 
+      Object.send :remove_const, :I18n #cleanup
       key.should == "x_v1_de"
     end
 
@@ -214,16 +211,20 @@ describe Cachy do
       Cachy.key_versions.should == {}
     end
 
+    it "merges in old when setting new" do
+      pending '!!!!!'
+    end
+
     it "adds a key when cache is called the first time" do
       Cachy.cache(:xxx){1}
       Cachy.key_versions[:xxx].should == 1
-      TEST_CACHE.read(Cachy::KEY_VERSIONS_KEY).should_not == nil
+      @cache.read(Cachy::KEY_VERSIONS_KEY).should_not == nil
     end
 
     it "does not add a key when cache is called the first time and cache is not healthy" do
-      TEST_CACHE.write(Cachy::HEALTH_CHECK_KEY, 'no')
+      @cache.write(Cachy::HEALTH_CHECK_KEY, 'no')
       Cachy.cache(:xxx){1}
-      TEST_CACHE.read(Cachy::KEY_VERSIONS_KEY).should == nil
+      @cache.read(Cachy::KEY_VERSIONS_KEY).should == nil
     end
 
     it "adds a string key as symbol" do
@@ -240,13 +241,13 @@ describe Cachy do
 
     it "reloads when keys have expired" do
       Cachy.send :class_variable_set, "@@key_versions", {:versions=>{:xx=>2}, :last_set=>(Time.now.to_i - 60)}
-      TEST_CACHE.write Cachy::KEY_VERSIONS_KEY, {:xx=>1}
+      @cache.write Cachy::KEY_VERSIONS_KEY, {:xx=>1}
       Cachy.key_versions.should == {:xx=>1}
     end
 
     it "does not reload when keys have not expired" do
       Cachy.send :class_variable_set, "@@key_versions", {:versions=>{:xx=>2}, :last_set=>Time.now.to_i}
-      TEST_CACHE.write Cachy::KEY_VERSIONS_KEY, {:xx=>1}
+      @cache.write Cachy::KEY_VERSIONS_KEY, {:xx=>1}
       Cachy.key_versions.should == {:xx=>2}
     end
 
@@ -254,6 +255,70 @@ describe Cachy do
       Cachy.send :class_variable_set, "@@key_versions", {:versions=>{:xx=>2}, :last_set=>Time.now.to_i}
       Cachy.key_versions = {:xx=>1}
       Cachy.key_versions[:xx].should == 1
+    end
+  end
+
+  describe :key_versions, "with timeout" do
+    before do
+      @mock = mock = {}
+      @cache.instance_eval{@data = mock}
+      def @mock.read_error_occured
+        false
+      end
+      def @mock.[](x)
+        {:x => 1}
+      end
+      Cachy.send(:class_variable_set, '@@cache_error', false)
+    end
+
+    it "reads normally" do
+      Cachy.send(:read_versions).should == {:x => 1}
+    end
+
+    it "reads empty when it crashes" do
+      @mock.should_receive(:[]).and_return nil # e.g. Timout happended
+      @mock.should_receive(:read_error_occured).and_return true
+      Cachy.send(:read_versions).should == {}
+    end
+
+    it "marks as error when it crashes" do
+      Cachy.send(:class_variable_get, '@@cache_error').should == false
+      @mock.should_receive(:read_error_occured).and_return true
+      Cachy.send(:read_versions)
+      Cachy.send(:class_variable_get, '@@cache_error').should == true
+    end
+
+    it "marks as error free when it reads successfully" do
+      Cachy.send(:class_variable_set, '@@cache_error', true)
+      Cachy.send(:class_variable_get, '@@cache_error').should == true
+      Cachy.send(:read_versions).should == {:x => 1}
+      Cachy.send(:class_variable_get, '@@cache_error').should == false
+    end
+
+    it "writes when it was not error before" do
+      Cachy.cache_store.should_receive(:write)
+      Cachy.send(:write_version, {})
+    end
+
+    it "does not write when it was error before" do
+      Cachy.send(:class_variable_set, '@@cache_error', true)
+      Cachy.cache_store.should_not_receive(:write)
+      Cachy.send(:write_version, {})
+    end
+  end
+
+  describe :delete_key do
+    it "removes a key from key versions" do
+      Cachy.cache(:xxx){1}
+      Cachy.key_versions.key?(:xxx).should == true
+      Cachy.delete_key :xxx
+      Cachy.key_versions.key?(:xxx).should == false
+    end
+
+    it "does not crash with unfound key" do
+      Cachy.delete_key :xxx
+      Cachy.delete_key :xxx
+      Cachy.key_versions.key?(:xxx).should == false
     end
   end
 end
