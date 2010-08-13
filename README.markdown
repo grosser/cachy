@@ -71,13 +71,12 @@ When they are updated the cache is automatically expired.
 Use a global `CACHE_VERSION=1` so that all caches can be expired when something big changes.
 The cache server does not need to be restarted and session data(Rails) is saved.
 
-
 #### Does not cache nil
 If you want to cache a falsy result, use false (same goes for :while_running)
     Cachy.cache(:x){ expensive || false }
     Cachy.cache(:x, :while_running=>false){ expensive }
 
-### Cachy.cache_if
+###Cachy.cache_if
 Only caches if condition is fulfilled
     Cachy.cache_if(condition, :foo, 'bar', :expires_in => 1.minute){do_something}
 
@@ -90,23 +89,25 @@ Expires all locales of a key
     Cachy.expire_view(:my_key)
     Cachy.expire(:my_key, :prefix=>'views/')
 
-
 ###Cachy.key
 Use to cache e.g. Erb output
     <% cache Cachy.key(:a_key), :expires_in=>1.hour do %>
       More html ...
     <% end %>
 
-
 ###Cachy.cache_store
 No ActionController::Base.cache_store ?  
 Give me something that responds to read/write(Rails style) or []/store([Moneta](http://github.com/wycats/moneta/tree/master)) or get/set(Memcached)
     Cachy.cache_store = some_cache
 
-
 ###Cachy.locales
 No I18n.available_locales ?
     Cachy.locales = [:de, :en, :fr]
+
+### Preheat the cache with multi_get
+    Cachy.preload_local_cache([[:foo, 1], [:bar, User.first]])
+    Cachy.cache(:foo, 1){ ... } # will not call the cache
+    Cachy.clear_local_cache! # free ram
 
 TODO
 ====
