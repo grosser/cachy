@@ -28,6 +28,14 @@ class Cachy
     cache_store.write key, result, options
     result
   end
+  
+  def self.cache_if(cond, *args, &block)
+    if cond
+      cache(*args, &block)
+    else
+      block.call
+    end
+  end
 
   # Constructs a cache-key (first argument must be a String/Symbol)
   #

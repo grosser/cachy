@@ -77,6 +77,10 @@ If you want to cache a falsy result, use false (same goes for :while_running)
     Cachy.cache(:x){ expensive || false }
     Cachy.cache(:x, :while_running=>false){ expensive }
 
+### Cachy.cache_if
+Only caches if condition is fulfilled
+    Cachy.cache_if(condition, :foo, 'bar', :expires_in => 1.minute){do_something}
+
 ###Cachy.expire / .expire_view
 Expires all locales of a key
     Cachy.locales = [:de, :en] # by default filled with I18n.available_locales

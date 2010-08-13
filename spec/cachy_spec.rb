@@ -49,6 +49,29 @@ describe Cachy do
       Cachy.cache(:x){ true }.should == true
     end
   end
+  
+  describe :cache_if do
+    it "should not call the cache command if condition is wrong" do
+      Cachy.should_not_receive(:cache)
+      Cachy.cache_if(false, :x) do
+        "asd"
+      end
+    end
+    
+    it "should call cache command if condition is true" do
+      Cachy.should_receive(:cache)
+      Cachy.cache_if(true, :x) do
+        "asd"
+      end
+    end
+    
+    it "should pass params correctly" do
+      Cachy.should_receive(:cache).with(:x, {:y => 1}, :expires_in => 3)
+      Cachy.cache_if(true, :x, {:y => 1}, :expires_in => 3) do
+        "asd"
+      end
+    end
+  end
 
   describe :expire do
     it "expires the cache for all languages" do
