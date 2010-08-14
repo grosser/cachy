@@ -73,31 +73,6 @@ describe Cachy do
     end
   end
 
-  describe :preload_local_cache do
-    it "finds items in pre-heated cache without cache request" do
-      Cachy.cache_store.write(Cachy.key(:foo,1), 'foo')
-      Cachy.preload_local_cache([[:foo, 1]])
-      Cachy.cache_store.write(Cachy.key(:foo,1), 'bar')
-      Cachy.cache(:foo,1).should == 'foo'
-    end
-
-    it "asks cache for items that could not be pre-heated" do
-      Cachy.preload_local_cache([[:foo, 1]])
-      Cachy.cache_store.write(Cachy.key(:foo,1), 'bar')
-      Cachy.cache(:foo,1).should == 'bar'
-    end
-  end
-
-  describe :clear_local_cache! do
-    it 'clears any local cache' do
-      Cachy.cache_store.write(Cachy.key(:foo,1), 'foo')
-      Cachy.preload_local_cache([[:foo, 1]])
-      Cachy.cache_store.write(Cachy.key(:foo,1), 'bar')
-      Cachy.clear_local_cache!
-      Cachy.cache(:foo,1).should == 'bar'
-    end
-  end
-
   describe :expire do
     it "expires the cache for all languages" do
       Cachy.cache(:my_key){ "without_locale" }

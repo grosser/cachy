@@ -5,17 +5,7 @@ class Cachy
   KEY_VERSIONS_KEY = 'cachy_key_versions'
 
   @@cache_error = false
-  @@local_cache = {}
 
-  def self.preload_local_cache(keys)
-    keys = keys.map{|x| key(*x)}
-    @@local_cache.merge!(cache_store.read_multi(keys))
-  end
-  
-  def self.clear_local_cache!
-    @@local_cache = {}
-  end
-  
   # Cache the result of a block
   #
   # Cachy.cache(:my_key){ expensive() }
@@ -23,13 +13,9 @@ class Cachy
   # Cachy.cache(:my_key, :keys=>[:dependent_key]){ expensive() }
   # Cachy.cache(:my_key, :without_locale=>true){ expensive() }
   # Cachy.cache(:my_key, :hash_key=>true){ expensive() }
-
   def self.cache(*args)
     key = key(*args)
     options = extract_options!(args)
-
-    result = @@local_cache[key]
-    return result unless result == nil
 
     result = cache_store.read(key)
     return result unless result == nil

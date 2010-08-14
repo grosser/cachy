@@ -7,14 +7,6 @@ class Cachy::Wrapper
     @wrapped[key]
   end
 
-  def read_multi(keys)
-    if @wrapped.respond_to?(:read_multi)
-      @wrapped.read_multi(keys)
-    else
-      to_hash keys.map{|k| [k,read(k)] }
-    end
-  end
-
   def method_missing(name, args)
     @wrapped.send(name, *args)
   end

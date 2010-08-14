@@ -104,11 +104,6 @@ Give me something that responds to read/write(Rails style) or []/store([Moneta](
 No I18n.available_locales ?
     Cachy.locales = [:de, :en, :fr]
 
-### Preheat the cache with multi_get
-    Cachy.preload_local_cache([[:foo, 1], [:bar, User.first]])
-    Cachy.cache(:foo, 1){ ... } # will not call the cache
-    Cachy.clear_local_cache! # free ram
-
 TODO
 ====
  - optionally store dependent keys (:keys=>xxx), so that they can be setup up once and do not need to be remembered
