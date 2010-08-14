@@ -7,10 +7,6 @@ class TestCache
     @data[name]
   end
 
-  def read_multi(names)
-    to_hash names.map{|n| [n,read(n)] }
-  end
-
   def write(name, value, options = nil)
     @data[name] = value.freeze
   end
@@ -25,13 +21,5 @@ class TestCache
 
   def keys
     @data.keys
-  end
-
-  private
-
-  def to_hash(array)
-    hash = {}
-    array.each{|k,v| hash[k]=v}
-    hash
   end
 end

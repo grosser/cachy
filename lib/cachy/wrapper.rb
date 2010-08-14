@@ -14,12 +14,4 @@ class Cachy::Wrapper
   def respond_to?(x)
     super(x) || @wrapped.respond_to?(x)
   end
-
-  private
-
-  def to_hash(array)
-    hash = {}
-    array.each{|k,v| hash[k]=v}
-    hash
-  end
 end
