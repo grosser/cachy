@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{cachy}
-  s.version = "0.1.3"
+  s.version = "0.1.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Michael Grosser"]
-  s.date = %q{2009-11-22}
+  s.date = %q{2010-08-14}
   s.email = %q{grosser.michael@gmail.com}
   s.extra_rdoc_files = [
     "README.markdown"
@@ -23,7 +23,6 @@ Gem::Specification.new do |s|
      "lib/cachy/memcached_wrapper.rb",
      "lib/cachy/moneta_wrapper.rb",
      "lib/cachy/wrapper.rb",
-     "rdoc/README.rdoc",
      "spec/cachy/memcached_wrapper_spec.rb",
      "spec/cachy/moneta_wrapper_spec.rb",
      "spec/cachy_spec.rb",
@@ -33,14 +32,14 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/grosser/cachy}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.5}
+  s.rubygems_version = %q{1.3.6}
   s.summary = %q{Caching library for projects that have many processes or many caches}
   s.test_files = [
-    "spec/spec_helper.rb",
-     "spec/test_cache.rb",
-     "spec/cachy/memcached_wrapper_spec.rb",
+    "spec/cachy/memcached_wrapper_spec.rb",
      "spec/cachy/moneta_wrapper_spec.rb",
-     "spec/cachy_spec.rb"
+     "spec/cachy_spec.rb",
+     "spec/test_cache.rb",
+     "spec/spec_helper.rb"
   ]
 
   if s.respond_to? :specification_version then
