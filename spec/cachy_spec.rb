@@ -285,7 +285,7 @@ describe Cachy do
     before do
       @mock = mock = {}
       @cache.instance_eval{@data = mock}
-      def @mock.read_error_occured
+      def @mock.read_error_occurred
         false
       end
       def @mock.[](x)
@@ -300,13 +300,13 @@ describe Cachy do
 
     it "reads empty when it crashes" do
       @mock.should_receive(:[]).and_return nil # e.g. Timout happended
-      @mock.should_receive(:read_error_occured).and_return true
+      @mock.should_receive(:read_error_occurred).and_return true
       Cachy.send(:read_versions).should == {}
     end
 
     it "marks as error when it crashes" do
       Cachy.send(:class_variable_get, '@@cache_error').should == false
-      @mock.should_receive(:read_error_occured).and_return true
+      @mock.should_receive(:read_error_occurred).and_return true
       Cachy.send(:read_versions)
       Cachy.send(:class_variable_get, '@@cache_error').should == true
     end
@@ -327,6 +327,23 @@ describe Cachy do
       Cachy.send(:class_variable_set, '@@cache_error', true)
       Cachy.cache_store.should_not_receive(:write)
       Cachy.send(:write_version, {})
+    end
+  end
+
+  describe :key_versions, 'with separate store' do
+    let(:key_cache){ TestCache.new }
+
+    it "reads from separate store" do
+      key_cache.write(Cachy::KEY_VERSIONS_KEY, :x => 1)
+      Cachy.key_versions_cache_store = key_cache
+      Cachy.key_versions.should == {:x => 1}
+    end
+
+    it "writes to separate store" do
+      key_cache.write(Cachy::KEY_VERSIONS_KEY, :x => 1)
+      Cachy.key_versions_cache_store = key_cache
+      Cachy.increment_key :x
+      Cachy.key_versions.should == {:x => 2}
     end
   end
 

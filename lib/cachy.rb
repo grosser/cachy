@@ -116,18 +116,8 @@ class Cachy
 
   # Wrap non ActiveSupport style cache stores,
   # to get the same interface for all
-  def self.cache_store=(x)
-    if x.respond_to? :read and x.respond_to? :write
-      @cache_store=x
-    elsif x.respond_to? "[]" and x.respond_to? :set
-      require 'cachy/memcached_wrapper'
-      @cache_store = MemcachedWrapper.new(x)
-    elsif x.respond_to? "[]" and x.respond_to? :store
-      require 'cachy/moneta_wrapper'
-      @cache_store = MonetaWrapper.new(x)
-    else
-      raise "This cache_store type is not usable for Cachy!"
-    end
+  def self.cache_store=(cache)
+    @cache_store = wrap_cache(cache)
     @cache_store.write HEALTH_CHECK_KEY, 'yes'
   end
 
@@ -135,7 +125,13 @@ class Cachy
     @cache_store || raise("Use: Cachy.cache_store = your_cache_store")
   end
 
-  self.cache_store = ActionController::Base.cache_store if defined? ActionController::Base
+  def self.key_versions_cache_store=(cache)
+    @key_versions_cache_store = wrap_cache(cache)
+  end
+
+  def self.key_versions_cache_store
+    @key_versions_cache_store || cache_store
+  end
 
   # locales
   @@locales = nil
@@ -154,19 +150,39 @@ class Cachy
 
   private
 
-  def self.read_versions
-    data = cache_store.instance_variable_get('@data')
-    if data.respond_to? :read_error_occured # its a MemCache with read_error detection !
-      result = data[KEY_VERSIONS_KEY] || {}
-      @@cache_error = data.read_error_occured
-      result
+  def self.wrap_cache(cache)
+    if cache.respond_to? :read and cache.respond_to? :write
+      cache
+    elsif cache.class.to_s == 'Redis'
+      require 'cachy/redis_wrapper'
+      RedisWrapper.new(cache)
+    elsif cache.respond_to? "[]" and cache.respond_to? :set
+      require 'cachy/memcached_wrapper'
+      MemcachedWrapper.new(cache)
+    elsif cache.respond_to? "[]" and cache.respond_to? :store
+      require 'cachy/moneta_wrapper'
+      MonetaWrapper.new(cache)
     else
-      cache_store.read(KEY_VERSIONS_KEY) || {}
+      raise "This cache_store type is not usable for Cachy!"
     end
   end
 
+  def self.read_versions
+    store = key_versions_cache_store
+    result = store.read(KEY_VERSIONS_KEY) || {}
+    detect_cache_error(store)
+    result
+  end
+
   def self.write_version(data)
-    cache_store.write(KEY_VERSIONS_KEY, data) unless @@cache_error
+    key_versions_cache_store.write(KEY_VERSIONS_KEY, data) unless @@cache_error
+  end
+
+  def self.detect_cache_error(store)
+    data = store.instance_variable_get('@data')
+    if data.respond_to? :read_error_occurred
+      @@cache_error = data.read_error_occurred
+    end
   end
 
   def self.cache_healthy?
@@ -234,3 +250,5 @@ class Cachy
     end
   end
 end
+
+Cachy.cache_store = ActionController::Base.cache_store if defined? ActionController::Base

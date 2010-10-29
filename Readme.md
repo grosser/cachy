@@ -8,7 +8,7 @@ Caching library to simplify and organize caching.
  - Global cache_version (expire everything Cachy cached, but not e.g. sessions)
  - ...
  - works out of the box with Rails
- - works with pure Memcache and [Moneta](http://github.com/wycats/moneta/tree/master)(-> Tokyo Cabinet / CouchDB / S3 / Berkeley DB / DataMapper / Memory store)
+ - works with pure Memcache, Redis and [Moneta](http://github.com/wycats/moneta/tree/master)(-> Tokyo Cabinet / CouchDB / S3 / Berkeley DB / DataMapper / Memory store)
 
 Install
 =======
@@ -104,6 +104,9 @@ Give me something that responds to read/write(Rails style) or []/store([Moneta](
 No I18n.available_locales ?
     Cachy.locales = [:de, :en, :fr]
 
+### Memcache timeout protection
+If Memcache timeouts keep killing your pages -> [catch MemCache timeouts](http://github.com/grosser/cachy/blob/master/lib/cachy/memcache_timeout_protection)
+
 TODO
 ====
  - optionally store dependent keys (:keys=>xxx), so that they can be setup up once and do not need to be remembered
@@ -114,6 +117,6 @@ Authors
 ###Contributors
  - [mindreframer](http://www.simplewebapp.de/roman)
 
-[Michael Grosser](http://pragmatig.wordpress.com)  
+[Michael Grosser](http://grosser.it)  
 grosser.michael@gmail.com  
 Hereby placed under public domain, do what you want, just do not hold me accountable...
