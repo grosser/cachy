@@ -1,5 +1,5 @@
 class Cachy
-  WHILE_RUNNING_TMEOUT = 5*60 #seconds
+  WHILE_RUNNING_TIMEOUT = 5*60 #seconds
   KEY_VERSION_TIMEOUT = 30 #seconds
   HEALTH_CHECK_KEY = 'cachy_healthy'
   KEY_VERSIONS_KEY = 'cachy_key_versions'
@@ -201,7 +201,7 @@ class Cachy
   def self.set_while_running(key, options)
     return unless options.key? :while_running
     warn "You cannot set while_running to nil" if options[:while_running] == nil
-    cache_store.write key, options[:while_running], :expires_in=>WHILE_RUNNING_TMEOUT
+    cache_store.write key, options[:while_running], :expires_in=>WHILE_RUNNING_TIMEOUT
   end
 
   def self.meta_key_parts(key, options)
