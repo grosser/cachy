@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{cachy}
-  s.version = "0.1.5"
+  s.version = "0.1.6"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Michael Grosser"]
-  s.date = %q{2010-10-29}
+  s.date = %q{2010-11-18}
   s.email = %q{grosser.michael@gmail.com}
   s.files = [
     "Rakefile",
@@ -22,10 +22,12 @@ Gem::Specification.new do |s|
      "lib/cachy/moneta_wrapper.rb",
      "lib/cachy/redis_wrapper.rb",
      "lib/cachy/wrapper.rb",
+     "spec/cachy/memcache_timeout_protection_spec.rb",
      "spec/cachy/memcached_wrapper_spec.rb",
      "spec/cachy/moneta_wrapper_spec.rb",
      "spec/cachy/redis_wrapper_spec.rb",
      "spec/cachy_spec.rb",
+     "spec/mem_cache.rb",
      "spec/spec_helper.rb",
      "spec/test_cache.rb"
   ]
@@ -37,7 +39,9 @@ Gem::Specification.new do |s|
   s.test_files = [
     "spec/cachy/memcached_wrapper_spec.rb",
      "spec/cachy/moneta_wrapper_spec.rb",
+     "spec/cachy/memcache_timeout_protection_spec.rb",
      "spec/cachy/redis_wrapper_spec.rb",
+     "spec/mem_cache.rb",
      "spec/cachy_spec.rb",
      "spec/test_cache.rb",
      "spec/spec_helper.rb"
