@@ -1,6 +1,6 @@
 # do not let MemCache timeouts kill your app,
 # mark as error and return read_error_callback (e.g. nil -> cache miss)
-require 'memcache'
+MemCache # class should exist at this point
 
 class MemCache
   # Add your callback to stop timeouts from raising
@@ -11,7 +11,10 @@ class MemCache
   #   nil
   # }
 
-  cattr_accessor :read_error_callback, :read_error_occurred
+  class << self
+    attr_accessor :read_error_callback
+  end
+  attr_accessor :read_error_occurred
 
   def cache_get_with_timeout_protection(*args)
     begin
@@ -26,5 +29,7 @@ class MemCache
       end
     end
   end
-  alias_method_chain :cache_get, :timeout_protection
+
+  alias_method :cache_get_without_timeout_protection, :cache_get
+  alias_method :cache_get, :cache_get_with_timeout_protection
 end

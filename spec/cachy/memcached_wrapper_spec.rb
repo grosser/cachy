@@ -1,35 +1,9 @@
 require 'spec/spec_helper'
-
-class TestMemcached
-  def initialize
-    @wrapped = {}
-  end
-
-  def set(key, object, ttl = nil)
-    raise 'nope!' if ttl.is_a? Hash or (ttl and not ttl.is_a? Numeric)
-    @wrapped[key] = object
-  end
-
-  def get(key)
-    @wrapped[key]
-  end
-
-  def [](x)
-    @wrapped[x]
-  end
-
-  def clear
-    @wrapped.clear
-  end
-
-  def delete(key)
-    @wrapped.delete(key)
-  end
-end
+require 'spec/mem_cache'
 
 describe "Cachy::MemcachedWrapper" do
   before :all do
-    @cache = TestMemcached.new
+    @cache = MemCache.new
     Cachy.cache_store = @cache
   end
 
