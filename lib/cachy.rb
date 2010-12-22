@@ -1,3 +1,5 @@
+require 'mini_memory_store'
+
 class Cachy
   WHILE_RUNNING_TIMEOUT = 5*60 #seconds
   KEY_VERSION_TIMEOUT = 30 #seconds
@@ -78,19 +80,12 @@ class Cachy
     expire(*args)
   end
 
-  # Fetch key_versions from cache every KEY_VERSION_TIMEOUT seconds,
-  # otherwise every .key call would result in an cache request
-  @@key_versions = {:versions=>{}, :last_set=>0}
   def self.key_versions
-    if key_versions_expired?
-      versions = read_versions
-      @@key_versions = {:versions=>versions, :last_set=>Time.now.to_i}
-    end
-    @@key_versions[:versions]
+    memory_store.cache{ read_versions }
   end
 
   def self.key_versions=(data)
-    @@key_versions[:last_set] = 0 #expire current key
+    memory_store.clear
     write_version(data)
   end
 
@@ -189,12 +184,6 @@ class Cachy
     cache_store.read(HEALTH_CHECK_KEY) == 'yes'
   end
 
-  # Do we need to fetch fresh key_versions from cache ?
-  def self.key_versions_expired?
-    key_versions_timeout = Time.now.to_i - KEY_VERSION_TIMEOUT
-    @@key_versions[:last_set] < key_versions_timeout
-  end
-
   # Temorarily store something else in the cache,
   # so that a often-called and slow cache-block is not run by
   # multiple processes in parallel
@@ -248,6 +237,10 @@ class Cachy
     else
       {}
     end
+  end
+
+  def self.memory_store
+    @memory_store ||= MiniMemoryStore.new(:expires_in => KEY_VERSION_TIMEOUT)
   end
 end
 

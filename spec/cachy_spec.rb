@@ -4,9 +4,9 @@ describe Cachy do
   before do
     @cache = TestCache.new
     Cachy.cache_store = @cache
-    Cachy.class_eval "@@key_versions = {:versions=>{}, :last_set=>0}"
     @cache.write(Cachy::HEALTH_CHECK_KEY, 'yes')
     Cachy.send(:class_variable_set, '@@cache_error', false)
+    Cachy.send(:memory_store).clear
   end
 
   describe :cache do
@@ -263,21 +263,16 @@ describe Cachy do
     end
 
     it "reloads when keys have expired" do
-      Cachy.send :class_variable_set, "@@key_versions", {:versions=>{:xx=>2}, :last_set=>(Time.now.to_i - 60)}
+      Cachy.key_versions.should == {} # fills cache
       @cache.write Cachy::KEY_VERSIONS_KEY, {:xx=>1}
+      Cachy.send(:memory_store).clear
       Cachy.key_versions.should == {:xx=>1}
     end
 
-    it "does not reload when keys have not expired" do
-      Cachy.send :class_variable_set, "@@key_versions", {:versions=>{:xx=>2}, :last_set=>Time.now.to_i}
-      @cache.write Cachy::KEY_VERSIONS_KEY, {:xx=>1}
-      Cachy.key_versions.should == {:xx=>2}
-    end
-
     it "expires when key_versions is set" do
-      Cachy.send :class_variable_set, "@@key_versions", {:versions=>{:xx=>2}, :last_set=>Time.now.to_i}
-      Cachy.key_versions = {:xx=>1}
-      Cachy.key_versions[:xx].should == 1
+      Cachy.key_versions.should == {}
+      Cachy.key_versions = {:xx => 1}
+      Cachy.key_versions.should == {:xx => 1}
     end
   end
 
