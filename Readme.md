@@ -47,7 +47,7 @@ Expire all all caches of one kind when code inside the cache has been updated
     Cachy.cache(:a_key, :witout_locale=>true){ 'German' } == 'English'
 
 ####Caching results of other caches
-When inner cache is expired outer cache would normally still shows old results.  
+When inner cache is expired outer cache would normally still shows old results.<br/>
 --> expire outer cache when inner cache is expired.
 
     a = Cachy.cache(:a, :expires_in=>1.day){ expensive() }
@@ -62,7 +62,7 @@ In case they get to long for your caching backend, makes them short but unreadab
     Cachy.cache(:a_key, :hash_key=>true){ expensive } # per call
 
 #### Uses .cache_key when available
-E.g. ActiveRecord objects are stored in the key with their updated_at timestamp.  
+E.g. ActiveRecord objects are stored in the key with their updated_at timestamp.<br/>
 When they are updated the cache is automatically expired.
 
     Cachy.cache(:my_key, User.first){ expensive }
@@ -96,7 +96,7 @@ Use to cache e.g. Erb output
     <% end %>
 
 ###Cachy.cache_store
-No ActionController::Base.cache_store ?  
+No ActionController::Base.cache_store ?<br/>
 Give me something that responds to read/write(Rails style) or []/store([Moneta](http://github.com/wycats/moneta/tree/master)) or get/set(Memcached)
     Cachy.cache_store = some_cache
 
@@ -117,6 +117,6 @@ Authors
 ###Contributors
  - [mindreframer](http://www.simplewebapp.de/roman)
 
-[Michael Grosser](http://grosser.it)  
-grosser.michael@gmail.com  
+[Michael Grosser](http://grosser.it)<br/>
+michael@grosser.it<br/>
 Hereby placed under public domain, do what you want, just do not hold me accountable...
