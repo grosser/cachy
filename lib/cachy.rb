@@ -38,6 +38,10 @@ class Cachy
     end
   end
 
+  def self.get(*args)
+    cache_store.read(key(*args))
+  end
+
   # Constructs a cache-key (first argument must be a String/Symbol)
   #
   # Cachy.key :my_key

@@ -73,6 +73,23 @@ describe Cachy do
     end
   end
 
+  describe :get do
+    it "gets back an object" do
+      Cachy.cache(:foo){'xxx'}
+      Cachy.get(:foo).should == 'xxx'
+    end
+
+    it "gets complex key" do
+      Cachy.cache(:foo, 1){'xxx'}
+      Cachy.get(:foo).should == nil
+      Cachy.get(:foo, 1).should == 'xxx'
+    end
+
+    it "gets back nil" do
+      Cachy.get(:bar).should == nil
+    end
+  end
+
   describe :expire do
     it "expires the cache for all languages" do
       Cachy.cache(:my_key){ "without_locale" }
