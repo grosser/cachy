@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{cachy}
-  s.version = "0.2.0"
+  s.version = "0.2.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Michael Grosser"]
-  s.date = %q{2010-12-22}
+  s.date = %q{2011-06-17}
   s.email = %q{grosser.michael@gmail.com}
   s.files = [
     "Gemfile",
@@ -35,7 +35,7 @@ Gem::Specification.new do |s|
   ]
   s.homepage = %q{http://github.com/grosser/cachy}
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.7}
+  s.rubygems_version = %q{1.6.2}
   s.summary = %q{Caching library for projects that have many processes or many caches}
   s.test_files = [
     "spec/cachy/memcache_timeout_protection_spec.rb",
@@ -49,7 +49,6 @@ Gem::Specification.new do |s|
   ]
 
   if s.respond_to? :specification_version then
-    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
