@@ -18,14 +18,14 @@ describe "MemCache timeout protection" do
   end
 
   it "catches timeout errors" do
-    MemCache.read_error_callback = lambda{}
+    MemCache.read_error_callback = lambda{|x|}
     simulate_timeout
     cache.get('x').should == nil
     cache.read_error_occurred.should == true
   end
 
   it "resets error_occurred to false after successful get" do
-    MemCache.read_error_callback = lambda{}
+    MemCache.read_error_callback = lambda{|x|}
     simulate_timeout
     cache.get('x').should == nil
     cache.stub!(:stubable_cache_get).and_return 1
@@ -42,7 +42,7 @@ describe "MemCache timeout protection" do
   end
 
   it "calls the callback" do
-    MemCache.read_error_callback = lambda{ 1 }
+    MemCache.read_error_callback = lambda{|x| 1 }
     simulate_timeout
     cache.get('x').should == 1
     cache.read_error_occurred.should == true

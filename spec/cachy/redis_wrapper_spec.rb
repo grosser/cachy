@@ -30,6 +30,8 @@ class TestRedis
 end
 
 describe "Cachy::RedisWrapper" do
+  let(:yaml_ending) { RUBY_VERSION > '1.9' ? "\n...\n" : "\n" }
+
   before :all do
     @cache = TestRedis.new
     Cachy.cache_store = @cache
@@ -49,13 +51,13 @@ describe "Cachy::RedisWrapper" do
   end
 
   it "can cache without expires" do
-    @cache.should_receive(:set).with('x_v1', "--- SUCCESS\n")
+    @cache.should_receive(:set).with('x_v1', "--- SUCCESS#{yaml_ending}")
     @cache.should_not_receive(:expire)
     Cachy.cache(:x){ 'SUCCESS' }.should == 'SUCCESS'
   end
 
   it "can cache with expires" do
-    @cache.should_receive(:set).with('x_v1', "--- SUCCESS\n")
+    @cache.should_receive(:set).with('x_v1', "--- SUCCESS#{yaml_ending}")
     @cache.should_receive(:expire).with('x_v1', 1)
     Cachy.cache(:x, :expires_in=>1){ 'SUCCESS' }.should == 'SUCCESS'
   end
