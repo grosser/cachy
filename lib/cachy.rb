@@ -29,7 +29,7 @@ class Cachy
     cache_store.write key, result, options
     result
   end
-  
+
   def self.cache_if(cond, *args, &block)
     if cond
       cache(*args, &block)
@@ -118,6 +118,8 @@ class Cachy
   def self.cache_store=(cache)
     @cache_store = wrap_cache(cache)
     @cache_store.write HEALTH_CHECK_KEY, 'yes'
+    @key_versions_cache_store = nil
+    memory_store.clear
   end
 
   def self.cache_store
