@@ -1,5 +1,5 @@
-require 'spec/spec_helper'
-require 'spec/mem_cache'
+require 'spec_helper'
+require './spec/mem_cache'
 require 'cachy/memcache_timeout_protection'
 
 describe "MemCache timeout protection" do

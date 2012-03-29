@@ -1,5 +1,5 @@
-require 'spec/spec_helper'
-require 'spec/mem_cache'
+require 'spec_helper'
+require './spec/mem_cache'
 
 describe "Cachy::MemcachedWrapper" do
   before :all do
