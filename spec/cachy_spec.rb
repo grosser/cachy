@@ -49,7 +49,7 @@ describe Cachy do
       Cachy.cache(:x){ true }.should == true
     end
   end
-  
+
   describe :cache_if do
     it "should not call the cache command if condition is wrong" do
       Cachy.should_not_receive(:cache)
@@ -57,14 +57,14 @@ describe Cachy do
         "asd"
       end
     end
-    
+
     it "should call cache command if condition is true" do
       Cachy.should_receive(:cache)
       Cachy.cache_if(true, :x) do
         "asd"
       end
     end
-    
+
     it "should pass params correctly" do
       Cachy.should_receive(:cache).with(:x, {:y => 1}, :expires_in => 3)
       Cachy.cache_if(true, :x, {:y => 1}, :expires_in => 3) do
@@ -356,6 +356,14 @@ describe Cachy do
       Cachy.key_versions_cache_store = key_cache
       Cachy.increment_key :x
       Cachy.key_versions.should == {:x => 2}
+    end
+
+    it "invalidates the cached key_versions_cache_store when a new cache store is used" do
+      key_cache.write(Cachy::KEY_VERSIONS_KEY, :x => 1)
+      Cachy.key_versions_cache_store = key_cache
+      Cachy.key_versions.should == {:x => 1}
+      Cachy.cache_store = @cache
+      Cachy.key_versions.should == {}
     end
   end
 
