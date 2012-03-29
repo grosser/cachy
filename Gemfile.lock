@@ -1,3 +1,9 @@
+PATH
+  remote: .
+  specs:
+    cachy (0.2.1)
+      mini_memory_store
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -17,6 +23,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  mini_memory_store
+  cachy!
   rake
   rspec (~> 2)

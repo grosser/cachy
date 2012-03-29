@@ -1,6 +1,5 @@
 source :rubygems
-
-gem 'mini_memory_store'
+gemspec
 
 group :development do
   gem 'rake'

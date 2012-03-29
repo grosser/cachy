@@ -1,6 +1,6 @@
 require 'mini_memory_store'
 
-class Cachy
+module Cachy
   WHILE_RUNNING_TIMEOUT = 5*60 #seconds
   KEY_VERSION_TIMEOUT = 30 #seconds
   HEALTH_CHECK_KEY = 'cachy_healthy'
