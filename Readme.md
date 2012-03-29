@@ -119,4 +119,6 @@ Authors
 
 [Michael Grosser](http://grosser.it)<br/>
 michael@grosser.it<br/>
-License: MIT
+License: MIT<br/>
+[![Build Status](https://secure.travis-ci.org/grosser/cachy.png)](http://travis-ci.org/grosser/cachy)
+
