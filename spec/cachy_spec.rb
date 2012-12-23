@@ -1,12 +1,22 @@
 require 'spec_helper'
 
 describe Cachy do
+
+  def reset_cachy!
+    Cachy.prefix    = nil
+    Cachy.hash_keys = false
+  end
+
   before do
     @cache = TestCache.new
     Cachy.cache_store = @cache
     @cache.write(Cachy::HEALTH_CHECK_KEY, 'yes')
     Cachy.send(:class_variable_set, '@@cache_error', false)
     Cachy.send(:memory_store).clear
+  end
+
+  after do
+    reset_cachy!
   end
 
   describe :cache do
@@ -173,13 +183,24 @@ describe Cachy do
       key.should == "x_v1_de"
     end
 
+    describe :prefix do
+      it "uses prefix, if set with Cachy.prefix = ..." do
+        user = mock(:cache_key=>'XXX',:something_else=>'YYY')
+        Cachy.prefix = "cachy_"
+        Cachy.key(:my_key, 1, user, "abc").should == 'cachy_my_key_1_XXX_abc_v1'
+      end
+
+      it "can be overridden by :prefix => ... option" do
+        user = mock(:cache_key=>'XXX',:something_else=>'YYY')
+        Cachy.prefix = "cachy_"
+        Cachy.key(:my_key, 1, user, "abc", :prefix => "special_prefix_").should_not == 'cachy_my_key_1_XXX_abc_v1'
+        Cachy.key(:my_key, 1, user, "abc", :prefix => "special_prefix_").should == 'special_prefix_my_key_1_XXX_abc_v1'
+      end
+    end
+
     describe "with :hash_key" do
       before do
         @hash = '3b2b8f418849bc73071375529f8515be'
-      end
-
-      after do
-        Cachy.hash_keys = false
       end
 
       it "hashed the key to a stable value" do

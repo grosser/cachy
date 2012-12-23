@@ -60,7 +60,8 @@ module Cachy
     end * "_"
 
     key = (options[:hash_key] || hash_keys) ? hash(key) : key
-    (options[:prefix].to_s + key + options[:suffix].to_s).gsub(' ', '_')
+    my_prefix = (options[:prefix] || prefix).to_s
+    (my_prefix + key + options[:suffix].to_s).gsub(' ', '_')
   end
 
   # Expire all possible locales of a cache, use the same arguments as with cache
@@ -111,6 +112,7 @@ module Cachy
 
   class << self
     attr_accessor :hash_keys
+    attr_accessor :prefix
   end
 
   # Wrap non ActiveSupport style cache stores,
