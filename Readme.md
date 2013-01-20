@@ -30,7 +30,7 @@ Example: at application startup 20 processes try to set the same cache -> 20 hea
 
 
 ####Seperate version for each key
-Expire all all caches of one kind when code inside the cache has been updated
+Expire all caches of one kind when code inside the cache has been updated
 
     100.times{ Cachy.cache(:a_key, rand(100000) ){ expensive() } }
     Cachy.increment_key(:a_key) --> everything expired
