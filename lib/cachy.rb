@@ -159,10 +159,10 @@ module Cachy
     elsif cache.class.to_s == 'Redis'
       require 'cachy/redis_wrapper'
       RedisWrapper.new(cache)
-    elsif cache.respond_to? "[]" and cache.respond_to? :set
+    elsif cache.respond_to? :get and cache.respond_to? :set
       require 'cachy/memcached_wrapper'
       MemcachedWrapper.new(cache)
-    elsif cache.respond_to? "[]" and cache.respond_to? :store
+    elsif cache.respond_to? :[] and cache.respond_to? :store
       require 'cachy/moneta_wrapper'
       MonetaWrapper.new(cache)
     else
