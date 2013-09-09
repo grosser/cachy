@@ -30,7 +30,7 @@ class TestRedis
 end
 
 describe "Cachy::RedisWrapper" do
-  let(:yaml_ending) { RUBY_VERSION > '1.9' ? "\n...\n" : "\n" }
+  let(:yaml_ending) { RUBY_VERSION > '1.9.2' ? "\n...\n" : "\n" }
 
   before :all do
     @cache = TestRedis.new
