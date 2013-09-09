@@ -21,10 +21,6 @@ class MemCache
     @wrapped[key]
   end
 
-  def [](x)
-    @wrapped[x]
-  end
-
   def clear
     @wrapped.clear
   end
