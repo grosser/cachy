@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    cachy (0.3.1)
+    cachy (0.4.0)
       mini_memory_store
 
 GEM
