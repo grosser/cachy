@@ -1,3 +1,3 @@
 module Cachy
-  Version = VERSION = '0.4.0'
+  Version = VERSION = '0.4.1'
 end
