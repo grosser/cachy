@@ -252,4 +252,6 @@ module Cachy
   end
 end
 
-Cachy.cache_store = ActionController::Base.cache_store if defined? ActionController::Base
+if defined?(ActionController::Base) && ActionController::Base.cache_store
+  Cachy.cache_store = ActionController::Base.cache_store
+end
