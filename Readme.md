@@ -156,6 +156,7 @@ Authors
 
 ### Contributors
  - [Roman Heinrich](https://github.com/mindreframer)
+ - [araishikeiwai](https://github.com/araishikeiwai)
 
 [Michael Grosser](http://grosser.it)<br/>
 michael@grosser.it<br/>
