@@ -156,7 +156,7 @@ module Cachy
   def self.wrap_cache(cache)
     if cache.respond_to? :read and cache.respond_to? :write
       cache
-    elsif cache.class.to_s == 'Redis'
+    elsif cache.class.to_s =~ /^Redis/
       require 'cachy/redis_wrapper'
       RedisWrapper.new(cache)
     elsif cache.respond_to? :get and cache.respond_to? :set
