@@ -3,7 +3,7 @@ require 'yaml'
 
 class Cachy::RedisWrapper < Cachy::Wrapper
   def read(key)
-    result = @wrapped[key]
+    result = @wrapped.get(key)
     return if result.nil?
     YAML.load(result)
   end
